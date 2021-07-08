@@ -51,11 +51,31 @@ export class AuthService {
     this.router.navigate(['/auth']);
   }
 
+  autoLogin() {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+
+    if (!userData) {
+      return;
+    }
+
+    const loadedUser = new UserModel(
+      userData.rawToken,
+      new Date(userData.tokenExpirationDate),
+      userData.email,
+      userData.id
+    );
+
+    if (loadedUser.token) {
+      this.userSubject.next(loadedUser);
+    }
+  }
+
   private handleAuthentication(email: string, token: string, expiresIn: number, userID: string) {
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
     const user = new UserModel(token, expirationDate, email, userID);
 
     this.userSubject.next(user);
+    localStorage.setItem('userData', JSON.stringify(user));
   }
 
   private handleError(errorResponse: HttpErrorResponse) {
