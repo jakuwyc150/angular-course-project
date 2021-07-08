@@ -1,5 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
@@ -23,7 +24,7 @@ export interface AuthResponseData {
 export class AuthService {
   userSubject = new BehaviorSubject<UserModel>(null);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   signup(email: string, password: string) {
     return this.http.post<AuthResponseData>('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + Config.FIREBASE_API_KEY, {
@@ -43,6 +44,11 @@ export class AuthService {
       catchError(this.handleError),
       tap(responseData => this.handleAuthentication(responseData.email, responseData.idToken, Number(responseData.expiresIn), responseData.localId))
     );
+  }
+
+  logout() {
+    this.userSubject.next(null);
+    this.router.navigate(['/auth']);
   }
 
   private handleAuthentication(email: string, token: string, expiresIn: number, userID: string) {
