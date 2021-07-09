@@ -46,3 +46,8 @@ Thumbs.db
 
 # Environment
 /src/environments
+
+# Firebase files
+/.firebase
+/.firebaserc
+/firebase.json
