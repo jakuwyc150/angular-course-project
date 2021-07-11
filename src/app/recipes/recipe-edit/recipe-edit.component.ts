@@ -1,25 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import * as fromRoot from 'src/app/store/app.reducer';
 import { Recipe } from '../recipe.model';
-import { RecipeService } from '../recipe.service';
+import * as fromRoot from 'src/app/store/app.reducer';
+import * as RecipeActions from '../store/recipe.actions';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-recipe-edit',
   templateUrl: './recipe-edit.component.html',
   styleUrls: ['./recipe-edit.component.css']
 })
-export class RecipeEditComponent implements OnInit {
+export class RecipeEditComponent implements OnInit, OnDestroy {
+  private storeSubscription: Subscription;
+
   id: number;
   editMode = false;
   recipeForm: FormGroup;
 
   constructor(
     private route: ActivatedRoute,
-    private recipeService: RecipeService,
     private router: Router,
     private store: Store<fromRoot.AppState>
   ) {}
@@ -32,7 +34,8 @@ export class RecipeEditComponent implements OnInit {
 
     if (this.editMode === true) {
       // const recipe = this.recipeService.getRecipe(this.id);
-      this.store.select('recipes').pipe(
+
+      this.storeSubscription = this.store.select('recipes').pipe(
         map(recipesState => {
           return recipesState.recipes.find((recipe, index) => {
             return index === this.id;
@@ -79,9 +82,16 @@ export class RecipeEditComponent implements OnInit {
     );
 
     if (this.editMode === true) {
-      this.recipeService.updateRecipe(this.id, newRecipe);
+      // this.recipeService.updateRecipe(this.id, newRecipe);
+
+      this.store.dispatch(new RecipeActions.UpdateRecipe({
+        index: this.id,
+        newRecipe
+      }));
     } else {
-      this.recipeService.addRecipe(newRecipe);
+      // this.recipeService.addRecipe(newRecipe);
+
+      this.store.dispatch(new RecipeActions.AddRecipe(newRecipe));
     }
 
     this.onCancel();
@@ -106,5 +116,11 @@ export class RecipeEditComponent implements OnInit {
 
   onDelete(index: number) {
     this.getIngredientsArray().removeAt(index);
+  }
+
+  ngOnDestroy() {
+    if (this.storeSubscription) {
+      this.storeSubscription.unsubscribe();
+    }
   }
 }
