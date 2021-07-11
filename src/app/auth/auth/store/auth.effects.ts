@@ -16,7 +16,8 @@ const handleAuthentication = (expiresIn: number, email: string, userID: string, 
   localStorage.setItem('userData', JSON.stringify(newUser));
 
   return new AuthActions.AuthenticateSuccess({
-    email, expirationDate, token, userID
+    email, expirationDate, token, userID,
+    redirect: true
   });
 }
 
@@ -74,7 +75,8 @@ export class AuthEffects {
           email: loadedUser.email,
           token: loadedUser.token,
           userID: loadedUser.id,
-          expirationDate: new Date(userData.tokenExpirationDate)
+          expirationDate: new Date(userData.tokenExpirationDate),
+          redirect: false
         });
 
         // this.autoLogout(expirationDuration);
@@ -131,8 +133,10 @@ export class AuthEffects {
   authRedirect = this.actions$.pipe(
     ofType(AuthActions.AUTH_SUCCESS),
 
-    tap(() => {
-      this.router.navigate(['/']);
+    tap((authSuccessAction: AuthActions.AuthenticateSuccess) => {
+      if (authSuccessAction.payload.redirect === true) {
+        this.router.navigate(['/']);
+      }
     })
   );
 
