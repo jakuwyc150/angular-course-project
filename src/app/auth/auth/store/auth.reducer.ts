@@ -59,6 +59,7 @@ export function authReducer(state = initialState, action: AuthActions.AuthAction
       return {
         ...state,
         authError: null,
+        loading: false,
         user: null
       };
     }
