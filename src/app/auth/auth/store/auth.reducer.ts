@@ -15,12 +15,12 @@ const initialState: State = {
 
 export function authReducer(state = initialState, action: AuthActions.AuthActions): State {
   switch (action.type) {
-    case AuthActions.LOGIN: {
+    case AuthActions.AUTH_SUCCESS: {
       const newUser = new UserModel(
-        (action as AuthActions.Login).payload.token,
-        (action as AuthActions.Login).payload.expirationDate,
-        (action as AuthActions.Login).payload.email,
-        (action as AuthActions.Login).payload.userID
+        (action as AuthActions.AuthenticateSuccess).payload.token,
+        (action as AuthActions.AuthenticateSuccess).payload.expirationDate,
+        (action as AuthActions.AuthenticateSuccess).payload.email,
+        (action as AuthActions.AuthenticateSuccess).payload.userID
       );
 
       return {
@@ -30,10 +30,10 @@ export function authReducer(state = initialState, action: AuthActions.AuthAction
       };
     }
 
-    case AuthActions.LOGIN_FAIL: {
+    case AuthActions.AUTH_FAIL: {
       return {
         ...state,
-        authError: (action as AuthActions.LoginFail).payload,
+        authError: (action as AuthActions.AuthenticateFail).payload,
         loading: false,
         user: null
       };
